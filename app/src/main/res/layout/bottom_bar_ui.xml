@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/linearLayoutBottomBarMain"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#161f21"
+    android:orientation="vertical"
+    android:textAlignment="center"
+    android:weightSum="100">
+
+    <LinearLayout
+        android:id="@+id/linearLayoutBottomBarButtons"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="16"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <ImageButton
+            android:id="@+id/sessionButton"
+            style="@style/UI_image_buttons"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="sessionButtonOnClick"
+            app:srcCompat="@drawable/ic_map" />
+
+        <ImageButton
+            android:id="@+id/markButton"
+            style="@style/UI_image_buttons"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="markerButtonOnClick"
+            app:srcCompat="@drawable/ic_flag" />
+
+        <ImageButton
+            android:id="@+id/wayPointButton"
+            style="@style/UI_image_buttons"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="waypointButtonOnClick"
+            app:srcCompat="@drawable/ic_waypoint" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutBottomBarDistance"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="21"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:id="@+id/textViewDistance"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Distance" />
+
+        <TextView
+            android:id="@+id/textViewDistanceSession"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/textViewDistanceMarker"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 m" />
+
+        <TextView
+            android:id="@+id/textViewDistanceWaypoint"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 m" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutBottomBarTime"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="21"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:id="@+id/textViewTime"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Time" />
+
+        <TextView
+            android:id="@+id/textViewTimeSession"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0" />
+
+        <TextView
+            android:id="@+id/textViewTimeMarker"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0" />
+
+        <TextView
+            android:id="@+id/textViewTimeWaypoint"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutBottomBarTraveled"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="21"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:id="@+id/textViewTraveled"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Traveled" />
+
+        <TextView
+            android:id="@+id/textViewTraveledSession"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 m" />
+
+        <TextView
+            android:id="@+id/textViewTraveledMarker"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 m" />
+
+        <TextView
+            android:id="@+id/textViewTraveledWaypoint"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 m" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linearLayoutBottomBarSpeed"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="21"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="horizontal"
+        android:weightSum="4">
+
+        <TextView
+            android:id="@+id/textViewSpeed"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Speed" />
+
+        <TextView
+            android:id="@+id/textViewSpeedSession"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 min/km" />
+
+        <TextView
+            android:id="@+id/textViewSpeedMarker"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 min/km" />
+
+        <TextView
+            android:id="@+id/textViewSpeedWaypoint"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="0 min/km" />
+    </LinearLayout>
+</LinearLayout>
