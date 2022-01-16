@@ -1,9 +1,20 @@
 package com.example.gpssportmap
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.location.Location
-import com.google.android.gms.maps.model.LatLng
+import android.os.Handler
+import android.os.Looper
+import android.os.Parcel
+import android.os.Parcelable
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.*
+import java.io.Serializable
 
-class MapBrain {
+class MapBrain() : Parcelable {
     // Session data
     var requesting = false
     var timeSession: Int = 0
@@ -25,6 +36,61 @@ class MapBrain {
     var timeWaypoint: Int = 0
     var traveledWaypoint: Int = 0
     var speedWaypoint: Float = 0f
+
+//    var wayPoint: Marker? = null
+    var lastKnownCoordinate: LatLng? = null
+    var lastKnownDistance: Int? = null
+
+    constructor(parcel: Parcel) : this() {
+        requesting = parcel.readByte() != 0.toByte()
+        timeSession = parcel.readInt()
+        traveledSession = parcel.readInt()
+        speedSession = parcel.readFloat()
+        markerOn = parcel.readByte() != 0.toByte()
+        markerLocation = parcel.readParcelable(LatLng::class.java.classLoader)!!
+        distanceMarker = parcel.readInt()
+        timeMarker = parcel.readInt()
+        traveledMarker = parcel.readInt()
+        speedMarker = parcel.readFloat()
+        waypointOn = parcel.readByte() != 0.toByte()
+        waypointLocation = parcel.readParcelable(LatLng::class.java.classLoader)!!
+        distanceWaypoint = parcel.readInt()
+        timeWaypoint = parcel.readInt()
+        traveledWaypoint = parcel.readInt()
+        speedWaypoint = parcel.readFloat()
+        lastKnownCoordinate = parcel.readParcelable(LatLng::class.java.classLoader)
+        lastKnownDistance = parcel.readValue(Int::class.java.classLoader) as? Int
+    }
+
+    fun addWaypoint(mapCenterCord: LatLng? = null): Boolean {
+        resetWaypoint()
+        waypointOn = true
+
+        if (mapCenterCord != null) {
+            waypointLocation = LatLng(mapCenterCord.latitude, mapCenterCord.longitude)
+        } else if (lastKnownCoordinate != null) {
+            waypointLocation = LatLng(lastKnownCoordinate!!.latitude, lastKnownCoordinate!!.longitude)
+        }
+
+
+        if (lastKnownCoordinate != null && lastKnownDistance != null) {
+            return true
+        }
+        return false
+    }
+
+    fun addMarker(): Boolean {
+        if (lastKnownCoordinate != null) {
+            resetMarker()
+            markerOn = true
+            markerLocation = LatLng(lastKnownCoordinate!!.latitude, lastKnownCoordinate!!.longitude)
+            if (lastKnownCoordinate != null && lastKnownDistance != null) {
+                return true
+            }
+            return false
+        }
+        return false
+    }
 
     fun incrementSessionTime() {
         timeSession++
@@ -105,5 +171,72 @@ class MapBrain {
         val seconds = speedAsInt - minutes * 60
 
         return "$minutes:" + getTimeUnitString(seconds) + " min/km"
+    }
+
+    // Code taken from this page: https://www.geeksforgeeks.org/how-to-create-landscape-layout-in-android-studio/
+    fun getBitmapIcon(context: Context, vectorResId: Int, width: Int = 100, length: Int = 100): BitmapDescriptor? {
+        // below line is use to generate a drawable.
+        val vectorDrawable = ContextCompat.getDrawable(context, vectorResId)
+
+        // below line is use to set bounds to our vector drawable.
+        vectorDrawable!!.setBounds(
+            0,
+            0,
+            width,
+            length
+        )
+
+        // below line is use to create a bitmap for our
+        // drawable which we have added.
+        val bitmap = Bitmap.createBitmap(
+            width,
+            length,
+            Bitmap.Config.ARGB_8888
+        )
+
+        // below line is use to add bitmap in our canvas.
+        val canvas = Canvas(bitmap)
+
+        // below line is use to draw our
+        // vector drawable in canvas.
+        vectorDrawable.draw(canvas)
+
+        // after generating our bitmap we are returning our bitmap.
+        return BitmapDescriptorFactory.fromBitmap(bitmap)
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeByte(if (requesting) 1 else 0)
+        parcel.writeInt(timeSession)
+        parcel.writeInt(traveledSession)
+        parcel.writeFloat(speedSession)
+        parcel.writeByte(if (markerOn) 1 else 0)
+        parcel.writeParcelable(markerLocation, flags)
+        parcel.writeInt(distanceMarker)
+        parcel.writeInt(timeMarker)
+        parcel.writeInt(traveledMarker)
+        parcel.writeFloat(speedMarker)
+        parcel.writeByte(if (waypointOn) 1 else 0)
+        parcel.writeParcelable(waypointLocation, flags)
+        parcel.writeInt(distanceWaypoint)
+        parcel.writeInt(timeWaypoint)
+        parcel.writeInt(traveledWaypoint)
+        parcel.writeFloat(speedWaypoint)
+        parcel.writeParcelable(lastKnownCoordinate, flags)
+        parcel.writeValue(lastKnownDistance)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<MapBrain> {
+        override fun createFromParcel(parcel: Parcel): MapBrain {
+            return MapBrain(parcel)
+        }
+
+        override fun newArray(size: Int): Array<MapBrain?> {
+            return arrayOfNulls(size)
+        }
     }
 }

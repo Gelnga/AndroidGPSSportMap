@@ -1,0 +1,26 @@
+package com.example.gpssportmap
+
+object Constants {
+    const val LOCATION_UPDATE_ACTION = "locationUpdate"
+    const val LOCATION = "location"
+    const val ADD_WAYPOINT_ACTION = "ADD_WAYPOINT_ACTION"
+    const val ADD_MARKER_ACTION = "ADD_MARKER_ACTION"
+    const val MAIN_NOTIFICATION_ID = 1
+    const val APP_CHANNEL_NAME = "APP_CHANNEL_NAME"
+    const val APP_CHANNEL_ID = "APP_CHANNEL_ID"
+    const val SEND_MAP_BRAIN_ACTION = "SEND_MAP_BRAIN_ACTION"
+    const val MAP_BRAIN = "MAP_BRAIN"
+
+    const val SESSION_TIMER_ACTION = "SESSION_TIMER_ACTION"
+    const val SESSION_TIME = "SESSION_TIME"
+    const val MARKER_TIMER_ACTION = "MARKER_TIMER_ACTION"
+    const val MARKER_TIME = "MARKER_TIME"
+    const val WAYPOINT_TIMER_ACTION = "WAYPOINT_TIMER_ACTION"
+    const val WAYPOINT_TIME = "WAYPOINT_TIME"
+
+    const val MARKER_CLICK_ACTION_NOT = "MARKER_CLICK_ACTION_NOT"
+    const val WAYPOINT_CLICK_ACTION_NOT = "WAYPOINT_CLICK_ACTION_NOT"
+
+    const val MARKER_CLICK_ACTION = "MARKER_CLICK_ACTION"
+    const val WAYPOINT_CLICK_ACTION = "WAYPOINT_CLICK_ACTION"
+}

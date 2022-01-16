@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="96dp"
+    android:background="#161f21"
+    android:orientation="horizontal"
+    android:weightSum="5">
+
+    <ImageButton
+        android:id="@+id/markButtonNot"
+        style="@style/UI_image_buttons"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@drawable/ic_flag" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:weightSum="3">
+
+        <TextView
+            android:id="@+id/textViewTimeMarkerNot"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="0" />
+
+        <TextView
+            android:id="@+id/textViewDistanceMarkerNot"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="0 m" />
+
+        <TextView
+            android:id="@+id/textViewSpeedMarkerNot"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="0 min/km" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:weightSum="3">
+
+        <TextView
+            android:id="@+id/textViewTimeNot"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="Time" />
+
+        <TextView
+            android:id="@+id/textViewDistanceNot"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="Distance" />
+
+        <TextView
+            android:id="@+id/textViewSpeedNot"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="Speed" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:weightSum="3">
+
+        <TextView
+            android:id="@+id/textViewTimeWaypointNot"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="0" />
+
+        <TextView
+            android:id="@+id/textViewDistanceWaypointNot"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="0 m" />
+
+        <TextView
+            android:id="@+id/textViewSpeedWaypointNot"
+            style="@style/Bottom_Bar_Text_Views"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="0 min/km" />
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/wayPointButtonNot"
+        style="@style/UI_image_buttons"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:src="@drawable/ic_waypoint" />
+</LinearLayout>

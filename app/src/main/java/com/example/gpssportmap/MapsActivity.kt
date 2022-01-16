@@ -6,20 +6,13 @@ import android.content.Intent
 import android.content.IntentFilter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 import com.example.gpssportmap.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.*
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.graphics.Color
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import android.widget.TextView
 
-import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.*
 
 
@@ -28,56 +21,38 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mMap: GoogleMap? = null
     private lateinit var binding: ActivityMapsBinding
 
-    private var markers: MutableList<Marker> = mutableListOf()
-    private var wayPoint: Marker? = null
-    private var lastKnownCoordinate: LatLng? = null
-    private var lastKnownDistance: Int? = null
-
     private var polyLineOptions = PolylineOptions().width(10f).color(Color.CYAN)
     private var polyLine: Polyline? = null
-
-    private val intentFilter = IntentFilter()
-    private val handler: Handler = Handler(Looper.getMainLooper())
-
     private lateinit var mapBrain: MapBrain
-
-    private val runSessionTimer: Runnable = object : Runnable {
-        override fun run() {
-            findViewById<TextView>(R.id.textViewTimeSession).text =
-                mapBrain.getTimeStringFromInt(mapBrain.timeSession)
-            mapBrain.incrementSessionTime()
-            handler.postDelayed(this, 1000)
-        }
-    }
-
-    private val runMarkerTimer: Runnable = object : Runnable {
-        override fun run() {
-            findViewById<TextView>(R.id.textViewTimeMarker).text =
-                mapBrain.getTimeStringFromInt(mapBrain.timeMarker)
-            mapBrain.incrementMarkerTime()
-            handler.postDelayed(this, 1000)
-        }
-    }
-
-    private val runWaypointTimer: Runnable = object : Runnable {
-        override fun run() {
-            findViewById<TextView>(R.id.textViewTimeWaypoint).text =
-                mapBrain.getTimeStringFromInt(mapBrain.timeWaypoint)
-            mapBrain.incrementWaypointTime()
-            handler.postDelayed(this, 1000)
-        }
-    }
-
-    init {
-        intentFilter.addAction(GPSService.LOCATION_UPDATE)
-    }
+    private var wayPoint: Marker? = null
+    private var sessionStart: Boolean = false
 
     private val receiver = Receiver()
+    private val intentFilter = IntentFilter()
+    init {
+        intentFilter.addAction(Constants.LOCATION_UPDATE_ACTION)
+        intentFilter.addAction(Constants.SEND_MAP_BRAIN_ACTION)
+        intentFilter.addAction(Constants.MARKER_CLICK_ACTION_NOT)
+        intentFilter.addAction(Constants.WAYPOINT_CLICK_ACTION_NOT)
+        intentFilter.addAction(Constants.SESSION_TIMER_ACTION)
+        intentFilter.addAction(Constants.MARKER_TIMER_ACTION)
+        intentFilter.addAction(Constants.WAYPOINT_TIMER_ACTION)
+    }
 
+    private fun updateSessionTime(time: String) {
+        findViewById<TextView>(R.id.textViewTimeSession).text = time
+    }
+
+    private fun updateMarkerTime(time: String) {
+        findViewById<TextView>(R.id.textViewTimeMarker).text = time
+    }
+
+    private fun updateWaypointTime(time: String) {
+        findViewById<TextView>(R.id.textViewTimeWaypoint).text = time
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mapBrain = MapBrain()
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -108,84 +83,109 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     fun sessionButtonOnClick(view: android.view.View) {
-        mapBrain.requesting = if (!mapBrain.requesting) {
-            LocalBroadcastManager.getInstance(this).registerReceiver(receiver, intentFilter)
+        sessionStart = if (!sessionStart) {
+            mMap!!.clear()
+            registerReceiver(receiver, intentFilter)
             val intent = Intent(this, GPSService::class.java)
             startService(intent)
-            handler.removeCallbacks(runSessionTimer)
-            handler.post(runSessionTimer)
             true
         } else {
-            handler.removeCallbacks(runSessionTimer)
             mapBrain.resetSession()
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+            unregisterReceiver(receiver)
             val intent = Intent(this, GPSService::class.java)
             stopService(intent)
             false
         }
     }
 
-    fun markerButtonOnClick(view: android.view.View) {
-        if (lastKnownCoordinate != null && mMap != null) {
-            handler.removeCallbacks(runMarkerTimer)
-            handler.post(runMarkerTimer)
-            mapBrain.resetMarker()
+    fun markerButtonOnClick(View: android.view.View) {
+        markerButtonClicked()
+    }
+
+    fun waypointButtonOnClick(View: android.view.View) {
+        waypointButtonClicked()
+    }
+
+    private fun markerButtonClicked(sendBroadcast: Boolean = true) {
+        if (mMap != null && sessionStart) {
             val options = MarkerOptions()
             options
-                .position(lastKnownCoordinate!!)
-                .title("marker" + markers.size)
-                .icon(getBitmapIcon(applicationContext, R.drawable.ic_marker))
+                .position(mapBrain.lastKnownCoordinate!!)
+                .title("")
+                .icon(mapBrain.getBitmapIcon(applicationContext, R.drawable.ic_marker))
 
             val marker = mMap!!.addMarker(options)
-            markers.add(marker!!)
-            mapBrain.markerOn = true
-            mapBrain.markerLocation = LatLng(lastKnownCoordinate!!.latitude, lastKnownCoordinate!!.longitude)
-            if (lastKnownCoordinate != null && lastKnownDistance != null) {
-                updateUI(lastKnownDistance!!, lastKnownCoordinate!!, false)
+
+            if (sendBroadcast) {
+                val intent = Intent(Constants.MARKER_CLICK_ACTION)
+                sendBroadcast(intent)
             }
         }
     }
 
-    fun waypointButtonOnClick(view: android.view.View) {
-        if (mMap != null && mapBrain != null) {
+    private fun waypointButtonClicked(sendBroadcast: Boolean = true) {
+        if (sessionStart) {
             if (wayPoint != null) {
                 wayPoint!!.remove()
             }
 
-            mapBrain.resetWaypoint()
             val targetCords = mMap!!.cameraPosition.target
             val options = MarkerOptions()
             options
                 .position(targetCords)
                 .title("waypoint")
-                .icon(getBitmapIcon(applicationContext, R.drawable.ic_waypoint))
+                .icon(mapBrain.getBitmapIcon(applicationContext, R.drawable.ic_waypoint))
 
             wayPoint = mMap!!.addMarker(options)
-            mapBrain.waypointOn = true
-            mapBrain.waypointLocation = LatLng(targetCords.latitude, targetCords.longitude)
-            handler.removeCallbacks(runWaypointTimer)
-            handler.post(runWaypointTimer)
-            if (lastKnownCoordinate != null && lastKnownDistance != null) {
-                updateUI(lastKnownDistance!!, lastKnownCoordinate!!, false)
+
+            if (sendBroadcast) {
+                val intent = Intent(Constants.WAYPOINT_CLICK_ACTION)
+                sendBroadcast(intent)
             }
         }
     }
 
     private inner class Receiver: BroadcastReceiver() {
         override fun onReceive(ctx: Context?, intent: Intent?) {
-            Log.d("Received", "")
-            val location = intent!!.extras!!.get(GPSService.LOCATION) as LatLng
+            if (intent!!.action == Constants.LOCATION_UPDATE_ACTION) {
+                processGPSServiceBroadcast(intent)
+            }
+
+            if (intent.action == Constants.SEND_MAP_BRAIN_ACTION) {
+                mapBrain = intent.extras!!.get(Constants.MAP_BRAIN) as MapBrain
+            }
+
+            if (intent.action == Constants.MARKER_CLICK_ACTION_NOT) {
+                markerButtonClicked(false)
+            }
+
+            if (intent.action == Constants.WAYPOINT_CLICK_ACTION_NOT) {
+                waypointButtonClicked(false)
+            }
+
+            if (intent.action == Constants.SESSION_TIMER_ACTION) {
+                updateSessionTime(intent.extras!!.get(Constants.SESSION_TIME) as String)
+            }
+
+            if (intent.action == Constants.MARKER_TIMER_ACTION) {
+                updateMarkerTime(intent.extras!!.get(Constants.MARKER_TIME) as String)
+            }
+
+            if (intent.action == Constants.WAYPOINT_TIMER_ACTION) {
+                updateWaypointTime(intent.extras!!.get(Constants.WAYPOINT_TIME) as String)
+            }
+        }
+
+        private fun processGPSServiceBroadcast(intent: Intent) {
+            val location = intent.extras!!.get(Constants.LOCATION) as LatLng
 
             if (mMap == null) return;
             val latLng = LatLng(location.latitude, location.longitude)
 
-            if (lastKnownCoordinate != null) {
-                val distance = mapBrain.getDistance(latLng, lastKnownCoordinate!!)
-                lastKnownDistance = distance
+            if (mapBrain.lastKnownCoordinate != null) {
+                val distance = mapBrain.getDistance(latLng, mapBrain.lastKnownCoordinate!!)
                 updateUI(distance, location)
             }
-
-            lastKnownCoordinate = latLng
 
             polyLineOptions.add(latLng)
             if (polyLine != null) {
@@ -193,13 +193,13 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             }
 
             polyLine = mMap!!.addPolyline(polyLineOptions)
-            polyLine!!.endCap = CustomCap(getBitmapIcon(applicationContext, R.drawable.ic_arrow, 50 ,50)!!)
+            polyLine!!.endCap = CustomCap(mapBrain.getBitmapIcon(applicationContext, R.drawable.ic_arrow, 50 ,50)!!)
             val newLocation = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
             mMap!!.animateCamera(newLocation)
         }
     }
 
-    fun updateUI(distance: Int, currentLocation: LatLng, updateTraveledDistance: Boolean = true) {
+    private fun updateUI(distance: Int, currentLocation: LatLng, updateTraveledDistance: Boolean = true) {
         if (mapBrain.requesting) {
             if(updateTraveledDistance) mapBrain.traveledSession += distance
             mapBrain.updateSpeedSession()
@@ -224,37 +224,5 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             findViewById<TextView>(R.id.textViewTraveledWaypoint).text = "${mapBrain.traveledWaypoint} m"
             findViewById<TextView>(R.id.textViewSpeedWaypoint).text = mapBrain.getSpeedString(mapBrain.speedWaypoint)
         }
-    }
-
-    // Code taken from this page: https://www.geeksforgeeks.org/how-to-create-landscape-layout-in-android-studio/
-    private fun getBitmapIcon(context: Context, vectorResId: Int, width: Int = 100, length: Int = 100): BitmapDescriptor? {
-        // below line is use to generate a drawable.
-        val vectorDrawable = ContextCompat.getDrawable(context, vectorResId)
-
-        // below line is use to set bounds to our vector drawable.
-        vectorDrawable!!.setBounds(
-            0,
-            0,
-            width,
-            length
-        )
-
-        // below line is use to create a bitmap for our
-        // drawable which we have added.
-        val bitmap = Bitmap.createBitmap(
-            width,
-            length,
-            Bitmap.Config.ARGB_8888
-        )
-
-        // below line is use to add bitmap in our canvas.
-        val canvas = Canvas(bitmap)
-
-        // below line is use to draw our
-        // vector drawable in canvas.
-        vectorDrawable.draw(canvas)
-
-        // after generating our bitmap we are returning our bitmap.
-        return BitmapDescriptorFactory.fromBitmap(bitmap)
     }
 }
