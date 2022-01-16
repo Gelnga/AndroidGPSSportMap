@@ -4,15 +4,12 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.location.Location
-import android.os.Handler
-import android.os.Looper
 import android.os.Parcel
 import android.os.Parcelable
-import android.widget.TextView
+import android.util.Log
 import androidx.core.content.ContextCompat
-import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.*
-import java.io.Serializable
+import org.json.JSONObject
 
 class MapBrain() : Parcelable {
     // Session data
@@ -21,7 +18,7 @@ class MapBrain() : Parcelable {
     var traveledSession: Int = 0
     var speedSession: Float = 0f
 
-    // Last marker values
+    // Last marker data
     var markerOn = false
     var markerLocation: LatLng = LatLng(0.0, 0.0)
     var distanceMarker: Int = 0
@@ -29,7 +26,7 @@ class MapBrain() : Parcelable {
     var traveledMarker: Int = 0
     var speedMarker: Float = 0f
 
-    // Waypoint values
+    // Waypoint data
     var waypointOn = false
     var waypointLocation: LatLng = LatLng(0.0, 0.0)
     var distanceWaypoint: Int = 0
@@ -37,29 +34,44 @@ class MapBrain() : Parcelable {
     var traveledWaypoint: Int = 0
     var speedWaypoint: Float = 0f
 
-//    var wayPoint: Marker? = null
+    // Last known coordinate related data
     var lastKnownCoordinate: LatLng? = null
     var lastKnownDistance: Int? = null
 
+    // Data saving
+    var trackHistory: MutableList<LatLng> = mutableListOf()
+    var markersHistory: MutableList<LatLng> = mutableListOf()
+
     constructor(parcel: Parcel) : this() {
+        // Session data
         requesting = parcel.readByte() != 0.toByte()
         timeSession = parcel.readInt()
         traveledSession = parcel.readInt()
         speedSession = parcel.readFloat()
+
+        // Last marker data
         markerOn = parcel.readByte() != 0.toByte()
         markerLocation = parcel.readParcelable(LatLng::class.java.classLoader)!!
         distanceMarker = parcel.readInt()
         timeMarker = parcel.readInt()
         traveledMarker = parcel.readInt()
         speedMarker = parcel.readFloat()
+
+        // Waypoint data
         waypointOn = parcel.readByte() != 0.toByte()
         waypointLocation = parcel.readParcelable(LatLng::class.java.classLoader)!!
         distanceWaypoint = parcel.readInt()
         timeWaypoint = parcel.readInt()
         traveledWaypoint = parcel.readInt()
         speedWaypoint = parcel.readFloat()
+
+        // Last known coordinate related data
         lastKnownCoordinate = parcel.readParcelable(LatLng::class.java.classLoader)
         lastKnownDistance = parcel.readValue(Int::class.java.classLoader) as? Int
+
+        // Data saving
+        parcel.readList(trackHistory, this::class.java.classLoader)
+        parcel.readList(markersHistory, this::class.java.classLoader)
     }
 
     fun addWaypoint(mapCenterCord: LatLng? = null): Boolean {
@@ -82,6 +94,7 @@ class MapBrain() : Parcelable {
     fun addMarker(): Boolean {
         if (lastKnownCoordinate != null) {
             resetMarker()
+            markersHistory.add(lastKnownCoordinate!!)
             markerOn = true
             markerLocation = LatLng(lastKnownCoordinate!!.latitude, lastKnownCoordinate!!.longitude)
             if (lastKnownCoordinate != null && lastKnownDistance != null) {
@@ -90,6 +103,10 @@ class MapBrain() : Parcelable {
             return false
         }
         return false
+    }
+
+    fun updateTrackHistory(latlng: LatLng) {
+        trackHistory.add(latlng)
     }
 
     fun incrementSessionTime() {
@@ -140,6 +157,13 @@ class MapBrain() : Parcelable {
         traveledWaypoint = 0
         speedWaypoint = 0f
     }
+
+//    fun trackHistoryToJson() {
+//        var json = ""
+//        for (cord in trackHistory) {
+//            json += JSON
+//        }
+//    }
 
     fun getTimeStringFromInt(time: Int): String {
         val hours = time / 3600
@@ -206,24 +230,35 @@ class MapBrain() : Parcelable {
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
+        // Session data
         parcel.writeByte(if (requesting) 1 else 0)
         parcel.writeInt(timeSession)
         parcel.writeInt(traveledSession)
         parcel.writeFloat(speedSession)
+
+        // Last marker data
         parcel.writeByte(if (markerOn) 1 else 0)
         parcel.writeParcelable(markerLocation, flags)
         parcel.writeInt(distanceMarker)
         parcel.writeInt(timeMarker)
         parcel.writeInt(traveledMarker)
         parcel.writeFloat(speedMarker)
+
+        // Last waypoint data
         parcel.writeByte(if (waypointOn) 1 else 0)
         parcel.writeParcelable(waypointLocation, flags)
         parcel.writeInt(distanceWaypoint)
         parcel.writeInt(timeWaypoint)
         parcel.writeInt(traveledWaypoint)
         parcel.writeFloat(speedWaypoint)
+
+        // Last known coordinate data
         parcel.writeParcelable(lastKnownCoordinate, flags)
         parcel.writeValue(lastKnownDistance)
+
+        // Data saving
+        parcel.writeList(trackHistory)
+        parcel.writeList(markersHistory)
     }
 
     override fun describeContents(): Int {

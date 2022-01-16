@@ -45,15 +45,17 @@ class GPSService : Service(), LocationListener {
         intentFilter.addAction(Constants.ADD_WAYPOINT_ACTION)
     }
 
+    private var isDead: Boolean = true
+
     private val handler: Handler = Handler(Looper.getMainLooper())
 
     private val runSessionTimer: Runnable = object : Runnable {
         override fun run() {
-            mapBrain.getTimeStringFromInt(mapBrain.timeSession)
+            val time = mapBrain.getTimeStringFromInt(mapBrain.timeSession)
             mapBrain.incrementSessionTime()
 
             val intent = Intent(Constants.SESSION_TIMER_ACTION)
-            intent.putExtra(Constants.SESSION_TIME, mapBrain.getTimeStringFromInt(mapBrain.timeSession))
+            intent.putExtra(Constants.SESSION_TIME, time)
             sendBroadcast(intent)
 
             handler.postDelayed(this, 1000)
@@ -71,7 +73,7 @@ class GPSService : Service(), LocationListener {
                 startForeground(Constants.MAIN_NOTIFICATION_ID, builder!!.build())
 
                 val intent = Intent(Constants.MARKER_TIMER_ACTION)
-                intent.putExtra(Constants.MARKER_TIME, mapBrain.getTimeStringFromInt(mapBrain.timeMarker))
+                intent.putExtra(Constants.MARKER_TIME, time)
                 sendBroadcast(intent)
 
                 handler.postDelayed(this, 1000)
@@ -90,7 +92,7 @@ class GPSService : Service(), LocationListener {
                 startForeground(Constants.MAIN_NOTIFICATION_ID, builder!!.build())
 
                 val intent = Intent(Constants.WAYPOINT_TIMER_ACTION)
-                intent.putExtra(Constants.WAYPOINT_TIME, mapBrain.getTimeStringFromInt(mapBrain.timeWaypoint))
+                intent.putExtra(Constants.WAYPOINT_TIME, time)
                 sendBroadcast(intent)
 
                 handler.postDelayed(this, 1000)
@@ -99,6 +101,7 @@ class GPSService : Service(), LocationListener {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        isDead = false
         mapBrain = MapBrain()
         mapBrain.requesting = true
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -142,7 +145,7 @@ class GPSService : Service(), LocationListener {
 
     override fun onDestroy() {
         locationManager.removeUpdates(this)
-        mapBrain.requesting = false
+        isDead = true
         unregisterReceiver(receiver)
         handler.removeCallbacks(runSessionTimer)
         handler.removeCallbacks(runMarkerTimer)
@@ -157,6 +160,7 @@ class GPSService : Service(), LocationListener {
 
     override fun onLocationChanged(location: Location) {
         val latLng = LatLng(location.latitude, location.longitude)
+        mapBrain.updateTrackHistory(latLng)
         val intentLoc = Intent(Constants.LOCATION_UPDATE_ACTION)
         intentLoc.putExtra(Constants.LOCATION, latLng)
 
@@ -190,10 +194,11 @@ class GPSService : Service(), LocationListener {
         }
     }
 
-    fun waypointButtonOnClick(sendBroadcast: Boolean = true) {
+    fun waypointButtonOnClick(sendBroadcast: Boolean = true, sentCords: LatLng? = null) {
         handler.removeCallbacks(runWaypointTimer)
         handler.post(runWaypointTimer)
-        if (mapBrain.addWaypoint()) {
+        if (mapBrain.addWaypoint(sentCords)) {
+            if (sentCords != null)
             updateNotificationUi(mapBrain.lastKnownDistance!!, mapBrain.lastKnownCoordinate!!, false)
         }
 
@@ -261,7 +266,7 @@ class GPSService : Service(), LocationListener {
         val builder = NotificationCompat.Builder(this, Constants.APP_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_map)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
             .setContent(notificationView)
 
         this.builder = builder
@@ -286,7 +291,17 @@ class GPSService : Service(), LocationListener {
             }
 
             if (action == Constants.WAYPOINT_CLICK_ACTION) {
-                waypointButtonOnClick(false)
+                val target = intent.extras!!.get(Constants.WAYPOINT_BROADCAST_VALUE) as LatLng
+                waypointButtonOnClick(false, target)
+            }
+
+            if (action == Constants.ASK_FOR_CACHED_BRAIN_ACTION) {
+                if (!isDead) {
+                    val intentBrain = Intent(Constants.SEND_MAP_BRAIN_ACTION)
+                    intentBrain.putExtra(Constants.MAP_BRAIN, mapBrain)
+
+                    sendBroadcast(intentBrain)
+                }
             }
         }
 

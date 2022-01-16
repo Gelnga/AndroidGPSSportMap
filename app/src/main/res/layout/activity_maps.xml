@@ -24,7 +24,7 @@
         app:layout_constraintGuide_percent="0.75" />
 
     <include
-        android:id="@+id/include"
+        android:id="@+id/includeBottomBar"
         layout="@layout/bottom_bar_ui"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -32,5 +32,22 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/guideline2" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.1" />
+
+    <include
+        android:id="@+id/includeTopBar"
+        layout="@layout/top_bar_ui"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
