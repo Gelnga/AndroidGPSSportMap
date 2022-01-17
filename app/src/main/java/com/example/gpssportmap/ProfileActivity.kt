@@ -1,5 +1,6 @@
 package com.example.gpssportmap
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -20,5 +21,21 @@ class ProfileActivity: AppCompatActivity() {
         findViewById<TextView>(R.id.textViewEmailProfile).text = email
         findViewById<TextView>(R.id.textViewFirstNameProfile).text = firstName
         findViewById<TextView>(R.id.textViewLastNameProfile).text = lastName
+    }
+
+    fun logOutButtonOnClick(view: android.view.View) {
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+
+        with (sharedPref.edit()) {
+            remove(Constants.USER_EMAIL_PREF)
+            remove(Constants.USER_PASSWORD_PREF)
+            remove(Constants.USER_TOKEN_PREF_KEY)
+            remove(Constants.USER_FIRST_NAME_PREF)
+            remove(Constants.USER_LAST_NAME_PREF)
+            commit()
+        }
+
+        val intent = Intent(this, LogInActivity::class.java)
+        startActivity(intent)
     }
 }

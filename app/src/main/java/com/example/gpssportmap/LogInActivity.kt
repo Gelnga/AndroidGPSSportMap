@@ -16,11 +16,12 @@ class LogInActivity: AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_log_in)
         if (checkIsUserLoggedIn()) {
             val intent = Intent(this, MapsActivity::class.java)
             startActivity(intent)
+            return
         }
+        setContentView(R.layout.activity_log_in)
     }
 
     private fun checkIsUserLoggedIn(): Boolean {
@@ -73,7 +74,8 @@ class LogInActivity: AppCompatActivity() {
 
         with (sharedPref.edit()) {
             val token = responseDeserialized.get("token") as String
-            val firstName = responseDeserialized.get("fistName") as String
+            Log.d("token", token)
+            val firstName = responseDeserialized.get("firstName") as String
             val lastName = responseDeserialized.get("lastName") as String
 
             putString(Constants.USER_EMAIL_PREF, email)
@@ -84,6 +86,10 @@ class LogInActivity: AppCompatActivity() {
 
             commit()
         }
+
+        val intent = Intent(this, MapsActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+        startActivity(intent)
     }
 
     private fun processError(error: String) {

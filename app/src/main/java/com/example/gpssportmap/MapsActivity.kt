@@ -12,6 +12,8 @@ import com.google.android.gms.maps.*
 
 import android.graphics.Color
 import android.text.InputType
+import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -28,6 +30,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var mapBrain: MapBrain
     private var wayPoint: Marker? = null
     private var sessionStart: Boolean = false
+
+    private var tracking: Boolean = true
 
     private val receiver = Receiver()
     private val intentFilter = IntentFilter()
@@ -159,6 +163,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         waypointButtonClicked()
     }
 
+    fun trackButtonOnClick(View: android.view.View) {
+        val trackButton = findViewById<Button>(R.id.buttonTrack)
+        if (tracking) {
+            trackButton.text = "OFF"
+        } else {
+            trackButton.text = "ON"
+        }
+        tracking = !tracking
+    }
+
     fun userProfileButtonOnClick(View: android.view.View) {
         val intent = Intent(this, ProfileActivity::class.java)
         startActivity(intent)
@@ -256,8 +270,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
             polyLine = mMap!!.addPolyline(polyLineOptions)
             polyLine!!.endCap = CustomCap(mapBrain.getBitmapIcon(applicationContext, R.drawable.ic_arrow, 50 ,50)!!)
-            val newLocation = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
-            mMap!!.animateCamera(newLocation)
+            if (tracking) {
+                val newLocation = CameraUpdateFactory.newLatLngZoom(latLng, 18f)
+                mMap!!.animateCamera(newLocation)
+            }
         }
     }
 

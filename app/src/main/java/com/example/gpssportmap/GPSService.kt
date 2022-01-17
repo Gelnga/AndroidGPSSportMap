@@ -18,12 +18,18 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.preference.PreferenceManager
+import com.android.volley.Response
+import com.android.volley.toolbox.StringRequest
 import com.google.android.gms.maps.model.LatLng
+import org.json.JSONObject
 import java.lang.Exception
+import kotlin.collections.HashMap
 
 class GPSService : Service(), LocationListener {
 
@@ -33,6 +39,13 @@ class GPSService : Service(), LocationListener {
 
     private var notificationView: RemoteViews? = null
     private var builder: NotificationCompat.Builder? = null
+
+    private var sessionId: String? = null
+    private var queuedTrackHistory: MutableList<Location> = mutableListOf()
+    private var queuedMarkers: MutableList<Location> = mutableListOf()
+    private var lastKnownLocation: Location? = null
+    private lateinit var token: String
+    private var previousWaypointId: String? = null
 
     private val receiver = Receiver()
     private val intentFilter = IntentFilter()
@@ -77,9 +90,8 @@ class GPSService : Service(), LocationListener {
                 val intent = Intent(Constants.MARKER_TIMER_ACTION)
                 intent.putExtra(Constants.MARKER_TIME, time)
                 sendBroadcast(intent)
-
-                handler.postDelayed(this, 1000)
             }
+            handler.postDelayed(this, 1000)
         }
     }
 
@@ -97,8 +109,39 @@ class GPSService : Service(), LocationListener {
                 intent.putExtra(Constants.WAYPOINT_TIME, time)
                 sendBroadcast(intent)
 
-                handler.postDelayed(this, 1000)
             }
+            handler.postDelayed(this, 1000)
+        }
+    }
+
+    private val backendSyncTimer: Runnable = object : Runnable {
+        override fun run() {
+            if (sessionId != null) {
+                val toRemove = mutableListOf<Location>()
+                for (location in queuedTrackHistory) {
+                    sendCoordinateToBackend(Constants.GPS_LOCATION_TYPE_LOC_ID, location)
+                    toRemove.add(location)
+                }
+
+                for (location in toRemove) {
+                    queuedTrackHistory.remove(location)
+                }
+
+                for (checkpoint in queuedMarkers) {
+                    sendCoordinateToBackend(Constants.GPS_LOCATION_TYPE_CP_ID, checkpoint)
+                    toRemove.add(checkpoint)
+                }
+
+                for (location in toRemove) {
+                    queuedMarkers.remove(location)
+                }
+
+                if (mapBrain.waypointLocation.latitude != 0.0 && mapBrain.waypointLocation.longitude != 0.0)
+                {
+                    sendCoordinateToBackend(Constants.GPS_LOCATION_TYPE_WP_ID, null, mapBrain.waypointLocation)
+                }
+            }
+            handler.postDelayed(this, 15000)
         }
     }
 
@@ -108,6 +151,10 @@ class GPSService : Service(), LocationListener {
         mapBrain.requesting = true
         mapRepository = MapRepository(applicationContext)
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        val sharedPref = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        token = sharedPref.getString(Constants.USER_TOKEN_PREF_KEY, null)!!
+        createNewSessionInBackend()
 
         val criteria = Criteria()
         provider = locationManager.getBestProvider(criteria, true)
@@ -135,7 +182,9 @@ class GPSService : Service(), LocationListener {
         sendBroadcast(intentBrain)
 
         handler.removeCallbacks(runSessionTimer)
+        handler.removeCallbacks(backendSyncTimer)
         handler.post(runSessionTimer)
+        handler.post(backendSyncTimer)
 
         locationManager.requestLocationUpdates(provider!!, 3000, 0f, this)
 
@@ -153,6 +202,7 @@ class GPSService : Service(), LocationListener {
         handler.removeCallbacks(runSessionTimer)
         handler.removeCallbacks(runMarkerTimer)
         handler.removeCallbacks(runWaypointTimer)
+        handler.removeCallbacks(backendSyncTimer)
 
         super.onDestroy()
     }
@@ -163,6 +213,10 @@ class GPSService : Service(), LocationListener {
 
     override fun onLocationChanged(location: Location) {
         val latLng = LatLng(location.latitude, location.longitude)
+
+        queuedTrackHistory.add(location)
+        lastKnownLocation = location
+
         mapBrain.updateTrackHistory(latLng)
         val intentLoc = Intent(Constants.LOCATION_UPDATE_ACTION)
         intentLoc.putExtra(Constants.LOCATION, latLng)
@@ -189,6 +243,9 @@ class GPSService : Service(), LocationListener {
         handler.post(runMarkerTimer)
         if (mapBrain.addMarker()) {
             updateNotificationUi(mapBrain.lastKnownDistance!!, mapBrain.lastKnownCoordinate!!, false)
+            if (lastKnownLocation != null) {
+                queuedMarkers.add(lastKnownLocation!!)
+            }
         }
 
         if (sendBroadcast) {
@@ -314,6 +371,130 @@ class GPSService : Service(), LocationListener {
                 mapRepository.close()
             }
         }
+    }
 
+    private fun createNewSessionInBackend() {
+        val url = "https://sportmap.akaver.com/api/v1/GpsSessions"
+        val handler = HttpSingletonHandler.getInstance(this)
+        val headers = mutableMapOf<String, String>()
+        headers.put("Authorization", "Bearer $token")
+
+        val httpRequest = object : StringRequest(
+            Method.POST,
+            url,
+            Response.Listener { response -> processResponseNewSession(response)
+                Log.d("responseNewSession", response.toString())},
+            Response.ErrorListener { errors -> Log.d("errorsNewSession", String(errors.networkResponse.data)) })
+        {
+            override fun getHeaders(): MutableMap<String, String> = headers
+
+            override fun getBodyContentType(): String {
+                return "application/json"
+            }
+
+            override fun getBody(): ByteArray {
+                val params = HashMap<String, String>()
+
+                params["name"] = "sessionSync"
+                params["description"] = "Session synchronization with server"
+
+                val json = JSONObject(params as Map<*, *>)
+                json.put("paceMin", 420)
+                json.put("paceMax", 600)
+                val obj = json.toString()
+
+                return obj.toByteArray()
+            }
+        }
+
+        handler.addToRequestQueue(httpRequest)
+    }
+
+    private fun processResponseNewSession(response: String) {
+        val responseJson = JSONObject(response)
+        sessionId = responseJson.get("id") as String
+        Log.d("sesss", sessionId!!)
+    }
+
+    private fun sendCoordinateToBackend(coordinateTypeId: String, location: Location? = null, latLng: LatLng? = null) {
+        val url = "https://sportmap.akaver.com/api/v1/GpsLocations"
+        val handler = HttpSingletonHandler.getInstance(this)
+        val headers = mutableMapOf<String, String>()
+        headers.put("Authorization", "Bearer $token")
+
+        var latitude = 0.0
+        var longitude = 0.0
+        var accuracy = 0f
+        var altitude = 0.0
+
+        if (location != null) {
+            latitude = location.latitude
+            longitude = location.longitude
+            accuracy = location.accuracy
+            altitude = location.altitude
+        } else {
+            latitude = latLng!!.latitude
+            longitude = latLng.longitude
+        }
+
+        val httpRequest = object : StringRequest(
+            Method.POST,
+            url,
+            Response.Listener { response -> processResponseNewCoordinate(response, coordinateTypeId)
+                Log.d("responseNewCoordinate", response.toString())},
+            Response.ErrorListener { errors -> Log.d("errorsNewCoordinate", String(errors.networkResponse.data)) })
+        {
+            override fun getHeaders(): MutableMap<String, String> = headers
+
+            override fun getBodyContentType(): String {
+                return "application/json"
+            }
+
+            override fun getBody(): ByteArray {
+                val params = HashMap<String, String>()
+                params["gpsSessionId"] = sessionId!!
+                params["gpsLocationTypeId"] = coordinateTypeId
+
+                val json = JSONObject(params as Map<*, *>)
+                json.put("latitude", latitude)
+                json.put("longitude", longitude)
+                json.put("accuracy", accuracy)
+                json.put("altitude", altitude)
+                val obj = json.toString()
+
+                return obj.toByteArray()
+            }
+        }
+
+        handler.addToRequestQueue(httpRequest)
+    }
+
+    private fun processResponseNewCoordinate(response: String, coordinateTypeId: String) {
+        if (coordinateTypeId == Constants.GPS_LOCATION_TYPE_WP_ID) {
+            val responseJson = JSONObject(response)
+            val id = responseJson.get("id") as String
+            if (previousWaypointId != null) {
+                deleteGpsLocationById(previousWaypointId!!)
+            }
+            previousWaypointId = id
+        }
+    }
+
+    private fun deleteGpsLocationById(id: String) {
+        val url = "https://sportmap.akaver.com/api/v1/GpsLocations/$id"
+        val handler = HttpSingletonHandler.getInstance(this)
+        val headers = mutableMapOf<String, String>()
+        headers.put("Authorization", "Bearer $token")
+
+        val httpRequest = object : StringRequest(
+            Method.DELETE,
+            url,
+            Response.Listener { response -> Log.d("responseDelete", response.toString())},
+            Response.ErrorListener { errors -> Log.d("errorsDelete", String(errors.networkResponse.data)) })
+        {
+            override fun getHeaders(): MutableMap<String, String> = headers
+        }
+
+        handler.addToRequestQueue(httpRequest)
     }
 }
