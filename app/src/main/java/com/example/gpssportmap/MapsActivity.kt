@@ -11,13 +11,12 @@ import com.example.gpssportmap.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.*
 
 import android.graphics.Color
-import android.util.Log
-import android.view.View
+import android.text.InputType
+import android.widget.EditText
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 
 import com.google.android.gms.maps.model.*
-import org.json.JSONArray
-
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -84,28 +83,72 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap = googleMap
     }
 
+    override fun onResume() {
+        super.onResume()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(receiver)
 
-        if (sessionStart) {
-            Log.d("trackHistory", mapBrain.trackHistory.toString())
-            Log.d("markers", JSONArray(mapBrain.markersHistory).toString())
-        }
+//        if (sessionStart) {
+//            Log.d("trackHistory", mapBrain.trackHistory.toString())
+//            Log.d("markers", JSONArray(mapBrain.markersHistory).toString())
+//        }
     }
 
     fun sessionButtonOnClick(view: android.view.View) {
-        sessionStart = if (!sessionStart) {
+        if (!sessionStart) {
             mMap!!.clear()
             val intent = Intent(this, GPSService::class.java)
             startService(intent)
-            true
+            sessionStart = true
         } else {
-            mapBrain.resetSession()
+            areYouSureDialogue()
+        }
+    }
+
+    private fun showSessionNameAlert() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Enter session name")
+        val input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_TEXT
+        builder.setView(input)
+
+        var playerName: String
+        builder.setPositiveButton("OK") { _, _ ->
+            playerName = input.text.toString()
+
+            val saveSessionIntent = Intent(Constants.SAVE_COMPLETED_SESSION_ACTION)
+            saveSessionIntent.putExtra(Constants.COMPLETED_SESSION_NAME, playerName)
+            sendBroadcast(saveSessionIntent)
+
             val intent = Intent(this, GPSService::class.java)
             stopService(intent)
-            false
+
+            sessionStart = false
         }
+
+        builder.show()
+    }
+
+    private fun areYouSureDialogue() {
+        val builder = AlertDialog.Builder(this)
+
+        builder.setTitle("Confirm")
+        builder.setMessage("Are you sure you want to end this session?")
+
+        builder.setPositiveButton("Yes") { dialog, _ ->
+            showSessionNameAlert()
+            dialog.dismiss()
+        }
+
+        builder.setNegativeButton("NO") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val alert = builder.create()
+        alert.show()
     }
 
     fun markerButtonOnClick(View: android.view.View) {
@@ -116,8 +159,18 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         waypointButtonClicked()
     }
 
+    fun userProfileButtonOnClick(View: android.view.View) {
+        val intent = Intent(this, ProfileActivity::class.java)
+        startActivity(intent)
+    }
+
     fun compassButtonOnClick(View: android.view.View) {
         val intent = Intent(this, CompassActivity::class.java)
+        startActivity(intent)
+    }
+
+    fun sessionsBoardButtonOnClick(View: android.view.View) {
+        val intent = Intent(this, SessionsActivity::class.java)
         startActivity(intent)
     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="UI_image_buttons" parent="Widget.AppCompat.ImageButton">
+    <style name="Image_buttons" parent="Widget.AppCompat.ImageButton">
         <item name="cornerRadius">5sp</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="android:adjustViewBounds">true</item>
@@ -9,8 +9,13 @@
         <item name="android:tint">@color/dark_gray</item>
         <item name="android:layout_gravity">center</item>
     </style>
-    <style name="Bottom_Bar_Text_Views" parent="Widget.AppCompat.TextView">
+
+    <style name="Text_Views" parent="Widget.AppCompat.TextView">
         <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/creme</item>
+    </style>
+
+    <style name="Input_fields" parent="Widget.AppCompat.EditText">
         <item name="android:textColor">@color/creme</item>
     </style>
 </resources>

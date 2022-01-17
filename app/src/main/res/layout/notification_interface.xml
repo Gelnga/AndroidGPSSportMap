@@ -16,7 +16,7 @@
 
         <ImageButton
             android:id="@+id/markButtonNot"
-            style="@style/UI_image_buttons"
+            style="@style/Image_buttons"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -32,7 +32,7 @@
 
             <TextView
                 android:id="@+id/textViewTimeMarkerNot"
-                style="@style/Bottom_Bar_Text_Views"
+                style="@style/Text_Views"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -40,7 +40,7 @@
 
             <TextView
                 android:id="@+id/textViewDistanceMarkerNot"
-                style="@style/Bottom_Bar_Text_Views"
+                style="@style/Text_Views"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -48,7 +48,7 @@
 
             <TextView
                 android:id="@+id/textViewSpeedMarkerNot"
-                style="@style/Bottom_Bar_Text_Views"
+                style="@style/Text_Views"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -66,7 +66,7 @@
 
             <TextView
                 android:id="@+id/textViewTimeNot"
-                style="@style/Bottom_Bar_Text_Views"
+                style="@style/Text_Views"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -74,7 +74,7 @@
 
             <TextView
                 android:id="@+id/textViewDistanceNot"
-                style="@style/Bottom_Bar_Text_Views"
+                style="@style/Text_Views"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -82,7 +82,7 @@
 
             <TextView
                 android:id="@+id/textViewSpeedNot"
-                style="@style/Bottom_Bar_Text_Views"
+                style="@style/Text_Views"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -99,7 +99,7 @@
 
             <TextView
                 android:id="@+id/textViewTimeWaypointNot"
-                style="@style/Bottom_Bar_Text_Views"
+                style="@style/Text_Views"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -107,7 +107,7 @@
 
             <TextView
                 android:id="@+id/textViewDistanceWaypointNot"
-                style="@style/Bottom_Bar_Text_Views"
+                style="@style/Text_Views"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -115,7 +115,7 @@
 
             <TextView
                 android:id="@+id/textViewSpeedWaypointNot"
-                style="@style/Bottom_Bar_Text_Views"
+                style="@style/Text_Views"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -125,7 +125,7 @@
 
         <ImageButton
             android:id="@+id/wayPointButtonNot"
-            style="@style/UI_image_buttons"
+            style="@style/Image_buttons"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"

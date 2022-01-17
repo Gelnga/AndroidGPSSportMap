@@ -9,6 +9,7 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.google.android.gms.maps.model.*
+import org.json.JSONArray
 import org.json.JSONObject
 
 class MapBrain() : Parcelable {
@@ -158,12 +159,44 @@ class MapBrain() : Parcelable {
         speedWaypoint = 0f
     }
 
-//    fun trackHistoryToJson() {
-//        var json = ""
-//        for (cord in trackHistory) {
-//            json += JSON
-//        }
-//    }
+    fun getTrackHistoryJson(): String {
+        return listOfCoordinatesToJson(trackHistory)
+    }
+
+    fun getMarkersHistoryJson(): String {
+        return listOfCoordinatesToJson(markersHistory)
+    }
+
+    private fun listOfCoordinatesToJson(cords: MutableList<LatLng>): String {
+        var jsonArray = JSONArray()
+        for (cord in cords) {
+            val jsonObject = JSONObject()
+            jsonObject.put(Constants.LATITUDE, cord.latitude)
+            jsonObject.put(Constants.LONGITUDE, cord.longitude)
+            jsonArray.put(jsonObject)
+        }
+        return jsonArray.toString()
+    }
+
+    fun restoreTrackHistoryFromJson(json: String) {
+        restoreListOfCoordinatesFromJson(trackHistory, json)
+    }
+
+    fun restoreMarkersHistoryFromJson(json: String) {
+        restoreListOfCoordinatesFromJson(markersHistory, json)
+    }
+
+    fun restoreListOfCoordinatesFromJson(cords: MutableList<LatLng>, json: String) {
+        val restoredArray = JSONArray(json)
+        for (i in 0 until restoredArray.length()) {
+            val restoredCord = restoredArray[i] as JSONObject
+            val latitude = restoredCord.get(Constants.LATITUDE) as Double
+            val longitude = restoredCord.get(Constants.LONGITUDE) as Double
+            val cord = LatLng(latitude, longitude)
+
+            cords.add(cord)
+        }
+    }
 
     fun getTimeStringFromInt(time: Int): String {
         val hours = time / 3600

@@ -20,7 +20,7 @@
 
         <ImageButton
             android:id="@+id/sessionButton"
-            style="@style/UI_image_buttons"
+            style="@style/Image_buttons"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -29,7 +29,7 @@
 
         <ImageButton
             android:id="@+id/markButton"
-            style="@style/UI_image_buttons"
+            style="@style/Image_buttons"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -38,7 +38,7 @@
 
         <ImageButton
             android:id="@+id/wayPointButton"
-            style="@style/UI_image_buttons"
+            style="@style/Image_buttons"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -58,7 +58,7 @@
 
         <TextView
             android:id="@+id/textViewDistance"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -66,14 +66,14 @@
 
         <TextView
             android:id="@+id/textViewDistanceSession"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1" />
 
         <TextView
             android:id="@+id/textViewDistanceMarker"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -81,7 +81,7 @@
 
         <TextView
             android:id="@+id/textViewDistanceWaypoint"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -99,7 +99,7 @@
 
         <TextView
             android:id="@+id/textViewTime"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -107,7 +107,7 @@
 
         <TextView
             android:id="@+id/textViewTimeSession"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -115,7 +115,7 @@
 
         <TextView
             android:id="@+id/textViewTimeMarker"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -123,7 +123,7 @@
 
         <TextView
             android:id="@+id/textViewTimeWaypoint"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -141,7 +141,7 @@
 
         <TextView
             android:id="@+id/textViewTraveled"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -149,7 +149,7 @@
 
         <TextView
             android:id="@+id/textViewTraveledSession"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -157,7 +157,7 @@
 
         <TextView
             android:id="@+id/textViewTraveledMarker"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -165,7 +165,7 @@
 
         <TextView
             android:id="@+id/textViewTraveledWaypoint"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -183,7 +183,7 @@
 
         <TextView
             android:id="@+id/textViewSpeed"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -191,7 +191,7 @@
 
         <TextView
             android:id="@+id/textViewSpeedSession"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -199,7 +199,7 @@
 
         <TextView
             android:id="@+id/textViewSpeedMarker"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -207,7 +207,7 @@
 
         <TextView
             android:id="@+id/textViewSpeedWaypoint"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"

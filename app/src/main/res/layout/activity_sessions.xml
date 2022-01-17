@@ -8,7 +8,7 @@
 
     <TextView
         android:id="@+id/textView"
-        style="@style/Bottom_Bar_Text_Views"
+        style="@style/Text_Views"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
@@ -31,16 +31,18 @@
 
         <TextView
             android:id="@+id/textView2"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_weight="2"
             android:text="Session name"
             android:textSize="20sp" />
 
         <TextView
             android:id="@+id/textView3"
-            style="@style/Bottom_Bar_Text_Views"
+            style="@style/Text_Views"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
@@ -53,7 +55,9 @@
         android:id="@+id/recyclerViewSessions"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="1dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

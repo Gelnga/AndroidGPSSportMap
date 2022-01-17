@@ -18,9 +18,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
-import android.view.View
 import android.widget.RemoteViews
-import android.widget.TextView
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -43,7 +41,11 @@ class GPSService : Service(), LocationListener {
         intentFilter.addAction(Constants.WAYPOINT_CLICK_ACTION)
         intentFilter.addAction(Constants.ADD_MARKER_ACTION)
         intentFilter.addAction(Constants.ADD_WAYPOINT_ACTION)
+        intentFilter.addAction(Constants.ASK_FOR_CACHED_BRAIN_ACTION)
+        intentFilter.addAction(Constants.SAVE_COMPLETED_SESSION_ACTION)
     }
+
+    private lateinit var mapRepository: MapRepository
 
     private var isDead: Boolean = true
 
@@ -104,6 +106,7 @@ class GPSService : Service(), LocationListener {
         isDead = false
         mapBrain = MapBrain()
         mapBrain.requesting = true
+        mapRepository = MapRepository(applicationContext)
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
         val criteria = Criteria()
@@ -302,6 +305,13 @@ class GPSService : Service(), LocationListener {
 
                     sendBroadcast(intentBrain)
                 }
+            }
+
+            if (action == Constants.SAVE_COMPLETED_SESSION_ACTION) {
+                val sessionName = intent.extras!!.get(Constants.COMPLETED_SESSION_NAME) as String
+                mapRepository.open()
+                mapRepository.saveSession(mapBrain, sessionName)
+                mapRepository.close()
             }
         }
 

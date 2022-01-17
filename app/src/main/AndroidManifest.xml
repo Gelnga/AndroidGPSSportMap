@@ -38,7 +38,7 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapsActivity"
+            android:name=".LogInActivity"
             android:exported="true"
             android:label="@string/title_activity_maps" >
             <intent-filter>
@@ -49,6 +49,12 @@
         </activity>
         
         <activity android:name=".CompassActivity" android:exported="true" />
+        <activity android:name=".SessionsActivity" android:exported="true" />
+        <activity android:name=".ViewPastSessionActivity" android:exported="true" />
+        <activity android:name=".MapsActivity" android:exported="true"/>
+        <activity android:name=".RegisterActivity" android:exported="true"/>
+        <activity android:name=".ProfileActivity" android:exported="true"/>
+
     </application>
 
 </manifest>

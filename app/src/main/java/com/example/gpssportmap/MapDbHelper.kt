@@ -1,46 +1,46 @@
 package com.example.gpssportmap
 
 import android.content.Context
+import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
-//class MapDbHelper(context: Context): SQLiteOpenHelper() {
-//    companion object {
-//        const val DATABASE_NAME = "Map.db"
-//        const val DATABASE_VERSION = 0
-//
-//        const val MAP_BRAIN_TABLE_NAME = "MAP_BRAIN"
-//
+class MapDbHelper(context: Context): SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
+    companion object {
+        const val DATABASE_NAME = "Map.db"
+        const val DATABASE_VERSION = 1
 
-//
-//
-//        const val SAVED_GAME_ID = "_id"
-//        const val SAVED_STATE = "SavedState"
-//        const val SAVE_DATE = "SavingDate"
-//        const val GAME_NAME = "GameName"
-//
-//        const val LEADERBOARD_TABLE_NAME = "LEADERBOARD"
-//
-//        const val GAME_ID = "_id"
-//        const val PLAYER_NAME = "PlayerName"
-//        const val TIME_SPENT = "TimeSpent"
-//        const val MOVES_MADE = "MovesMade"
-//
-//        const val SQL_GAME_SAVES_CREATE_TABLE =
-//            "CREATE TABLE $GAME_SAVES_TABLE_NAME (" +
-//                    "$SAVED_GAME_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-//                    "$SAVED_STATE TEXT NOT NULL, " +
-//                    "$SAVE_DATE TEXT NOT NULL, " +
-//                    "$GAME_NAME TEXT NOT NULL);"
-//
-//        const val SQL_DELETE_GAME_SAVES_TABLES = "DROP TABLE IF EXISTS $GAME_SAVES_TABLE_NAME"
-//
-//        const val SQL_GAME_LEADERBOARD_CREATE_TABLE =
-//            "CREATE TABLE $LEADERBOARD_TABLE_NAME (" +
-//                    "$GAME_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
-//                    "$PLAYER_NAME TEXT NOT NULL, " +
-//                    "$TIME_SPENT TEXT NOT NULL, " +
-//                    "$MOVES_MADE INTEGER NOT NULL);"
-//
-//        const val SQL_DELETE_LEADERBOARD_TABLES = "DROP TABLE IF EXISTS $LEADERBOARD_TABLE_NAME"
-//    }
-//}
+        const val SESSION_TABLE_NAME = "SESSION"
+
+        const val SESSION_ID = "_id"
+        const val SESSION_API_ID = "SessionApiId"
+        const val SESSION_NAME = "SessionName"
+        const val DATE_SAVED = "DateSaved"
+        const val TRACK_HISTORY = "TrackHistory"
+        const val MARKERS_HISTORY = "MarkersHistory"
+
+        const val SQL_SESSIONS_CREATE_TABLE =
+            "CREATE TABLE $SESSION_TABLE_NAME (" +
+                    "$SESSION_ID INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "$SESSION_API_ID TEXT NULL, " +
+                    "$SESSION_NAME TEXT NOT NULL, " +
+                    "$DATE_SAVED TEXT NOT NULL, " +
+                    "$TRACK_HISTORY TEXT NOT NULL, " +
+                    "$MARKERS_HISTORY TEXT NOT NULL);"
+
+        const val SQL_DELETE_SESSION_TABLE = "DROP TABLE IF EXISTS $SESSION_TABLE_NAME"
+    }
+
+    override fun onCreate(db: SQLiteDatabase?) {
+        db?.execSQL(SQL_SESSIONS_CREATE_TABLE)
+    }
+
+    override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
+        db?.execSQL(SQL_DELETE_SESSION_TABLE)
+        onCreate(db)
+    }
+
+    fun deleteAllSessions(db: SQLiteDatabase?) {
+        db?.execSQL(SQL_DELETE_SESSION_TABLE)
+        db?.execSQL(SQL_SESSIONS_CREATE_TABLE)
+    }
+}
