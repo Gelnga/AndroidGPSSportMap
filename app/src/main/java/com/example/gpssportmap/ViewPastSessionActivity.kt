@@ -36,10 +36,20 @@ class ViewPastSessionActivity: AppCompatActivity(), OnMapReadyCallback {
         repo.close()
     }
 
-
     override fun onMapReady(map: GoogleMap) {
         mMap = map
         restoreMapDrawingsFromBrain()
+    }
+
+    fun exportAsGPXOnClick(view: android.view.View) {
+        val parser = GPXParser()
+        val restoredLocs = mutableListOf<LatLng>()
+        mapBrain.restoreListOfCoordinatesFromJson(restoredLocs, dto.trackHistory)
+
+        val restoredMarkers = mutableListOf<LatLng>()
+        mapBrain.restoreListOfCoordinatesFromJson(restoredMarkers, dto.markersHistory)
+
+        parser.gpxParse(restoredLocs, restoredMarkers, applicationContext)
     }
 
     fun getMarkerOptions(latLng: LatLng): MarkerOptions {
