@@ -30,6 +30,7 @@ import com.google.android.gms.maps.model.LatLng
 import org.json.JSONObject
 import java.lang.Exception
 import kotlin.collections.HashMap
+import kotlin.random.Random
 
 class GPSService : Service(), LocationListener {
 
@@ -39,6 +40,9 @@ class GPSService : Service(), LocationListener {
 
     private var notificationView: RemoteViews? = null
     private var builder: NotificationCompat.Builder? = null
+
+    private var autosaving: Boolean = false
+    private var autosaveName: String? = null
 
     private var sessionId: String? = null
     private var queuedTrackHistory: MutableList<Location> = mutableListOf()
@@ -234,6 +238,18 @@ class GPSService : Service(), LocationListener {
         val intentBrain = Intent(Constants.SEND_MAP_BRAIN_ACTION)
         intentBrain.putExtra(Constants.MAP_BRAIN, mapBrain)
 
+        if (!autosaving) {
+            autosaving = true
+            autosaveName = "Autosave" + (0..10000).random()
+            mapRepository.open()
+            mapRepository.saveSession(mapBrain, autosaveName!! ,sessionId!!)
+            mapRepository.close()
+        }
+
+        mapRepository.open()
+        mapRepository.updateSession(mapBrain, autosaveName!!)
+        mapRepository.close()
+
         sendBroadcast(intentBrain)
         sendBroadcast(intentLoc)
     }
@@ -367,7 +383,7 @@ class GPSService : Service(), LocationListener {
             if (action == Constants.SAVE_COMPLETED_SESSION_ACTION) {
                 val sessionName = intent.extras!!.get(Constants.COMPLETED_SESSION_NAME) as String
                 mapRepository.open()
-                mapRepository.saveSession(mapBrain, sessionName)
+                mapRepository.saveSession(mapBrain, sessionName, sessionId!!)
                 mapRepository.close()
             }
         }

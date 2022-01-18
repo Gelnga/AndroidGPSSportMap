@@ -131,6 +131,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             stopService(intent)
 
             sessionStart = false
+            polyLineOptions = PolylineOptions().width(10f).color(Color.CYAN)
         }
 
         builder.show()

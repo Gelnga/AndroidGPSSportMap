@@ -21,15 +21,26 @@ class MapRepository(private val context: Context) {
         dbHelper.close()
     }
 
-    fun saveSession(mapBrain: MapBrain, name: String) {
+    fun saveSession(mapBrain: MapBrain, name: String, sessionId: String) {
         val contentValues = ContentValues()
 
         contentValues.put(MapDbHelper.SESSION_NAME, name)
+        contentValues.put(MapDbHelper.SESSION_API_ID, sessionId)
         contentValues.put(MapDbHelper.DATE_SAVED, stf.format(Calendar.getInstance().time).toString())
         contentValues.put(MapDbHelper.TRACK_HISTORY, mapBrain.getTrackHistoryJson())
         contentValues.put(MapDbHelper.MARKERS_HISTORY, mapBrain.getMarkersHistoryJson())
 
         db.insert(MapDbHelper.SESSION_TABLE_NAME, null, contentValues)
+    }
+
+    fun updateSession(mapBrain: MapBrain, name: String) {
+        val contentValues = ContentValues()
+
+        contentValues.put(MapDbHelper.DATE_SAVED, stf.format(Calendar.getInstance().time).toString())
+        contentValues.put(MapDbHelper.TRACK_HISTORY, mapBrain.getTrackHistoryJson())
+        contentValues.put(MapDbHelper.MARKERS_HISTORY, mapBrain.getMarkersHistoryJson())
+
+        db.update(MapDbHelper.SESSION_TABLE_NAME, contentValues, "${MapDbHelper.SESSION_NAME}=?", arrayOf(name))
     }
 
     fun getSessions(): Array<SessionDto?> {
