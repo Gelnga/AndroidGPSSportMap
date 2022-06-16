@@ -40,5 +40,5 @@ Main use case of the application is to measure distance from point A to point B,
 
 ### Saved session preview  
 
-<img src="https://user-images.githubusercontent.com/73603988/174054354-6dba4dac-2541-44ff-9cad-af87041d2de2.png" width="400">
+<img src="https://user-images.githubusercontent.com/73603988/174059945-4a5ed0ff-b055-4098-ae29-e01a294a28dc.jpg" width="400">
 <img src="https://user-images.githubusercontent.com/73603988/174057965-b40c83a1-04a5-450c-b043-032abbe237d3.jpg">
