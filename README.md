@@ -3,7 +3,7 @@
 ## Technologies used: Android SDK, Kotlin, Google Maps API
 
 Goal of the project was to create an android application, that could help a user to orientate on an unknown terrain. It should be used with an orienting map like this one:
-![image]<img src="https://user-images.githubusercontent.com/73603988/174054354-6dba4dac-2541-44ff-9cad-af87041d2de2.png">
+![image]<img src="https://user-images.githubusercontent.com/73603988/174054354-6dba4dac-2541-44ff-9cad-af87041d2de2.png" width="400">
 
 Main use case of the application is to measure distance from point A to point B, then using map and built into application compass finding out approximate direction of a path to point B from point A. After collecting mentioned data, walk to the direction of point B and use built into application distance meter from point A, comparing it with the previously mesured distance, so you know that you are on the rigth distance to find point B. 
 
